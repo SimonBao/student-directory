@@ -27,9 +27,13 @@ def prints(students)
   # each method iterates through each student in students Array.
   # and puts their name and cohort out.
   print 'Search by letter: '
-  starts_with = gets.chomp
-  students.each_with_index do |student, idx|
-    puts "#{idx+1}.#{student[:name].capitalize} (#{student[:cohort].capitalize} cohort)" if starts_with.match((student[:name])[0])
+starts_with = gets.chomp
+  total_students = 0
+  until total_students == students.count
+    if starts_with.match(((students[total_students])[:name])[0])
+      puts "#{total_students+1}.#{(students[total_students])[:name].capitalize} (#{(students[total_students])[:cohort].capitalize})"
+    end
+    total_students += 1
   end
 end
 
