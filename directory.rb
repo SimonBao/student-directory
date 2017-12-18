@@ -1,57 +1,133 @@
-#input_students prompts user guide and prompts for a student name
-#name obtained is pushed to students Array in a hash format with the current cohort
-def input_students
-  puts 'Please enter the name of the students.'
-  puts 'To finish, just hit return twice.'
-  students = []
+def input_student
+  print 'Student name: '
   name = gets.chomp
-  #until name is empty it keeps running. 'until name.empty?' also could be used.
-  while !name.empty? do
-    hobbies, country, height = more_info
-    students << {name: name, cohort: 'november', hobby: hobbies, origin: country, height: height}
-    puts "Now we have #{students.count} students"
+  students = []
+  until name.empty? do
+    cohort, hobby, country, height = student_details
+    students << {name: name.capitalize.to_sym,
+                 cohort: cohort.capitalize.to_sym,
+                 hobby: hobby.capitalize.to_sym,
+                 country: country.capitalize.to_sym,
+                 height: height}
+    print "Current Student Count: #{students.count}\n"
+    print 'Student name:'
     name = gets.chomp
   end
+  print 'Choose Option => '
   students
 end
 
-def more_info
-  print 'What is your hobby: '
+
+def student_details
+  print 'Student cohort: '
+  cohort = gets.gsub!(/[\s]/, '')
+  print 'Student hobby: '
   hobby = gets.chomp
-  print "What is your country: "
+  print 'Student country: '
   country = gets.chomp
-  print "hat is your height in cm: "
+  print 'Student height: '
   height = gets.chomp
-  return hobby, country, height
+  check_answer(cohort, hobby, country, height)
+end
+
+def check_answer(cohort, hobby, country, height)
+  cohort = 'None' if cohort.empty?
+  hobby = 'None' if hobby.empty?
+  country = 'None' if country.empty?
+  height = 'None' if height.empty?
+  return cohort, hobby, country, height
 end
 
 def print_header
-  puts 'The students of Villains Academy'
-  puts '-------------'
-end
+  puts 'Students of Villains Academy'.center(100)
+  puts '--------------'.center(100)
 
-def print_footer(students)
-  print "Overall, we have #{students.count} great students.\n"
 end
 
 def prints(students)
-  # each method iterates through each student in students Array.
-  # and puts their name and cohort out.
-  # print 'Search by letter: '
-  # starts_with = gets.chomp
-  students.each_with_index do |student, idx|
-    # puts "#{idx+1}.#{student[:name].capitalize} (#{student[:cohort].capitalize} cohort)"  if starts_with.match((student[:name])[0])
-    print "#{idx}."
-    student.each do |k, v|
-      print "#{k}: #{v}, "
-    end
+  students.each do |student|
+    print student.map { |key, value| "#{key}: #{value}" }.join(', ').center(100)
     puts
   end
 end
 
+def print_footer(students)
+  puts '--------------'.center(100)
+  if students.count > 1
+    puts "We have #{students.count} great students.".center(100)
+  elsif students.count.zero?
+    puts "Sadly we have #{students.count} students.".center(100)
+  else
+    puts "We have #{students.count} great student.".center(100)
+  end
+end
 
+def menu_options
+  puts
+  puts 'Option 1) Enroll New Students'
+  puts 'Option 2) Print Academy Students'
+  puts 'Option 3) Menu Options'
+  puts 'Option 4) Save student details to database'
+  puts 'Option 5) Load student database'
+  puts 'Option 9) Quit'
+  choose_option
+end
 
-students = input_students
-print_header
-prints(students)
-print_footer(students)
+def print_students(students)
+  print_header
+  prints(students)
+  print_footer(students)
+  choose_option
+end
+
+def save_students
+  #Opens up a file called 'students.csv' and write to it 'w'. If the file does not exist, it creates it.
+  file = File.open('students.csv', 'w')
+  # Iteration through every single student
+  @students.each do |student|
+    student_data = [student[:name], student[:cohort]].join(', ')
+    file.puts(student_data)
+    # csv_line = student_data.join(', ') Original code provided
+    # file.puts(csv_line)                Original code provided
+  end
+  choose_option
+  file.close
+end
+
+def load_students
+  file = File.open('students.csv', 'r')
+  file.readlines.each do |line|
+    name, cohort = line.chomp.split(',')
+    @students << {name: name, cohort: cohort.to_sym}
+  end
+  choose_option
+  file.close
+end
+
+def choose_option
+  print 'Choose Option => '
+end
+
+def menu
+  @students = []
+  menu_options
+  loop do
+    user_input = gets.chomp
+    case user_input
+      when '1'
+        @students += input_student
+      when '2'
+        print_students(@students)
+      when '3'
+        menu_options
+      when '4'
+        save_students
+      when '5'
+        load_students
+      when '9'
+        exit
+    end
+  end
+end
+
+menu
