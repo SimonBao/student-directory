@@ -1,23 +1,19 @@
-@students = []
 def input_student
-  students = []
   print 'Student name: '
   name = STDIN.gets.chomp
   until name.empty? do
     cohort, hobby, country, height = student_details
-    students << {name: name.capitalize.to_sym,
+    @students << {name: name.capitalize.to_sym,
                  cohort: cohort.capitalize.to_sym,
                  hobby: hobby.capitalize.to_sym,
                  country: country.capitalize.to_sym,
                  height: height}
-    print "Current Student Count: #{students.count}\n"
+    print "Current Student Count: #{@students.count}\n"
     print 'Student name:'
     name = STDIN.gets.chomp
   end
   print 'Choose Option => '
-  students
 end
-
 
 def student_details
   print 'Student cohort: '
@@ -95,6 +91,10 @@ def save_students
   file.close
 end
 
+def choose_option
+  print 'Choose Option => '
+end
+
 def try_load_students
   filename = ARGV.first #This would be the first argument passed in the command line
   return if filename.nil? #stop method here and return nil if there is no argument passed
@@ -102,8 +102,12 @@ def try_load_students
     load_students(filename, true) #passes the filename to load_students and overrites default 'student.csv'
     puts "Total students #{@students.count} added."
   else
-    puts "Sorry, #{filename} does not exist."
-end
+    puts "Sorry, file '#{filename}' does not exist."
+    if File.exist?('students.csv')
+      load_students('students.csv', true)
+      puts "Total students #{@students.count} added from file 'students.csv'."
+    end
+  end
 end
 
 def load_students(filename = 'students.csv', start=false )
@@ -116,17 +120,13 @@ def load_students(filename = 'students.csv', start=false )
   file.close
 end
 
-def choose_option
-  print 'Choose Option => '
-end
-
 def menu
   menu_options
   loop do
     user_input = STDIN.gets.chomp
     case user_input
       when '1'
-        @students += input_student
+        input_student
       when '2'
         print_students
       when '3'
@@ -134,12 +134,13 @@ def menu
       when '4'
         save_students
       when '5'
-        load_students()
+        load_students
       when '9'
         exit
     end
   end
 end
 
+@students = []
 try_load_students
 menu
