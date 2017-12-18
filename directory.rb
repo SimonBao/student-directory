@@ -1,7 +1,8 @@
+@students = []
 def input_student
-  print 'Student name: '
-  name = gets.chomp
   students = []
+  print 'Student name: '
+  name = STDIN.gets.chomp
   until name.empty? do
     cohort, hobby, country, height = student_details
     students << {name: name.capitalize.to_sym,
@@ -11,7 +12,7 @@ def input_student
                  height: height}
     print "Current Student Count: #{students.count}\n"
     print 'Student name:'
-    name = gets.chomp
+    name = STDIN.gets.chomp
   end
   print 'Choose Option => '
   students
@@ -20,13 +21,13 @@ end
 
 def student_details
   print 'Student cohort: '
-  cohort = gets.gsub!(/[\s]/, '')
+  cohort = STDIN.gets.gsub!(/[\s]/, '')
   print 'Student hobby: '
-  hobby = gets.chomp
+  hobby = STDIN.gets.chomp
   print 'Student country: '
-  country = gets.chomp
+  country = STDIN.gets.chomp
   print 'Student height: '
-  height = gets.chomp
+  height = STDIN.gets.chomp
   check_answer(cohort, hobby, country, height)
 end
 
@@ -44,21 +45,21 @@ def print_header
 
 end
 
-def prints(students)
-  students.each do |student|
+def prints
+  @students.each do |student|
     print student.map { |key, value| "#{key}: #{value}" }.join(', ').center(100)
     puts
   end
 end
 
-def print_footer(students)
+def print_footer
   puts '--------------'.center(100)
-  if students.count > 1
-    puts "We have #{students.count} great students.".center(100)
-  elsif students.count.zero?
-    puts "Sadly we have #{students.count} students.".center(100)
+  if @students.count > 1
+    puts "We have #{@students.count} great students.".center(100)
+  elsif @students.count.zero?
+    puts "Sadly we have #{@students.count} students.".center(100)
   else
-    puts "We have #{students.count} great student.".center(100)
+    puts "We have #{@students.count} great student.".center(100)
   end
 end
 
@@ -73,10 +74,10 @@ def menu_options
   choose_option
 end
 
-def print_students(students)
+def print_students
   print_header
-  prints(students)
-  print_footer(students)
+  prints
+  print_footer
   choose_option
 end
 
@@ -94,13 +95,24 @@ def save_students
   file.close
 end
 
-def load_students
-  file = File.open('students.csv', 'r')
+def try_load_students
+  filename = ARGV.first #This would be the first argument passed in the command line
+  return if filename.nil? #stop method here and return nil if there is no argument passed
+  if File.exist?(filename) # if arguement is passed and there is a file that matches the arguement continue
+    load_students(filename, true) #passes the filename to load_students and overrites default 'student.csv'
+    puts "Total students #{@students.count} added."
+  else
+    puts "Sorry, #{filename} does not exist."
+end
+end
+
+def load_students(filename = 'students.csv', start=false )
+  file = File.open(filename, 'r')
   file.readlines.each do |line|
     name, cohort = line.chomp.split(',')
     @students << {name: name, cohort: cohort.to_sym}
   end
-  choose_option
+  start ? nil : choose_option
   file.close
 end
 
@@ -109,25 +121,25 @@ def choose_option
 end
 
 def menu
-  @students = []
   menu_options
   loop do
-    user_input = gets.chomp
+    user_input = STDIN.gets.chomp
     case user_input
       when '1'
         @students += input_student
       when '2'
-        print_students(@students)
+        print_students
       when '3'
         menu_options
       when '4'
         save_students
       when '5'
-        load_students
+        load_students()
       when '9'
         exit
     end
   end
 end
 
+try_load_students
 menu
